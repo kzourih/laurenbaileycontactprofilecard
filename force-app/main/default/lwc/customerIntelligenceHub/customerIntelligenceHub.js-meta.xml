@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>62.0</apiVersion>
+    <isExposed>true</isExposed>
+    <masterLabel>Customer Intelligence Hub</masterLabel>
+    <description>Customer intelligence dashboard with support cases and financial portfolio. All data fields can be overridden for demos.</description>
+    <targets>
+        <target>lightning__RecordPage</target>
+    </targets>
+    <targetConfigs>
+        <targetConfig targets="lightning__RecordPage">
+            <objects>
+                <object>Contact</object>
+            </objects>
+            <property name="accentColor" type="String" label="Accent Color" description="Hex color for accents. Defaults to SLDS brand blue." default="#3A49DA" />
+            <property name="backgroundImage" type="String" label="Banner Image URL" description="URL for the banner image at top of card." default="https://images.unsplash.com/photo-1501594907352-04cda38ebc29?w=800&amp;h=300&amp;fit=crop&amp;crop=center" />
+            <property name="tierLabel" type="String" label="Tier Label" description="Customer tier badge (e.g. Platinum, Gold). Leave empty to hide." default="Platinum" />
+            <property name="memberSince" type="String" label="Member Since" description="Override member since year (e.g. 2019). Leave empty to use record data." default="" />
+            <property name="overrideOpenCases" type="String" label="Override Open Cases" description="Override the open case count for demos. Leave empty for live data." default="" />
+            <property name="overrideHighPriorityCases" type="String" label="Override High Priority Cases" description="Override high priority case count for demos. Leave empty for live data." default="" />
+            <property name="overrideCasesJson" type="String" label="Override Cases (JSON)" description="JSON array of cases for demos. Example: [{&quot;id&quot;:&quot;1&quot;,&quot;caseNumber&quot;:&quot;00001&quot;,&quot;subject&quot;:&quot;Login issue&quot;,&quot;status&quot;:&quot;New&quot;,&quot;priority&quot;:&quot;High&quot;,&quot;isOpen&quot;:true}]. Leave empty for live data." default="" />
+            <property name="overrideLoansJson" type="String" label="Override Loans (JSON)" description="JSON array of loans for demos. Example: [{&quot;id&quot;:&quot;1&quot;,&quot;loanType&quot;:&quot;Mortgage&quot;,&quot;interestRate&quot;:5.25,&quot;originalAmount&quot;:400000,&quot;currentBalance&quot;:350000}]. Leave empty for live data." default="" />
+        </targetConfig>
+    </targetConfigs>
+</LightningComponentBundle>

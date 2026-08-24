@@ -1,0 +1,256 @@
+<template>
+    <lightning-card if:true={hasSummary} class="portal-shell">
+        <div class="top-bar">
+            <div>
+                <div class="logo">CIRRUS WEALTH PARTNERS</div>
+                <div class="sub-logo">ADVISOR VIEW · LAUREN 360</div>
+            </div>
+            <div class="top-right">
+                <div class="avatar">{customerInitials}</div>
+                <div>
+                    <div class="customer-name">{summary.customerName}</div>
+                    <div class="tier-badge">★ PRIVATE CLIENT</div>
+                </div>
+                <lightning-button-icon icon-name="utility:refresh" alternative-text="Refresh" onclick={handleRefresh}></lightning-button-icon>
+            </div>
+        </div>
+
+        <div class="greeting">
+            <h1>Good {todayPartOfDay}. Lauren Bailey relationship summary.</h1>
+            <p>
+                Relationship movement:
+                <span class={monthlyDirectionClass}>
+                    <lightning-formatted-number value={summary.monthlyChange} format-style="currency" currency-code="USD"></lightning-formatted-number>
+                </span>
+                this month, with HELOC status currently
+                <strong>{summary.heloc.complianceStatus}</strong>.
+            </p>
+        </div>
+
+        <div class="grid two-col">
+            <section class="card hero">
+                <div class="hero-label">TOTAL RELATIONSHIP VALUE · AGENT BRIEFING</div>
+                <div class="hero-amount">
+                    <lightning-formatted-number value={summary.totalRelationshipValue} format-style="currency" currency-code="USD"></lightning-formatted-number>
+                </div>
+                <div class="hero-metrics">
+                    <span>▲ <lightning-formatted-number value={summary.ytdReturnPercent} format-style="percent-fixed" maximum-fraction-digits="1"></lightning-formatted-number> YTD</span>
+                    <span>·</span>
+                    <span><lightning-formatted-number value={summary.monthlyChange} format-style="currency" currency-code="USD"></lightning-formatted-number> this month</span>
+                </div>
+                <svg class="chart" viewBox="0 0 420 95" preserveAspectRatio="none" aria-hidden="true">
+                    <path d={chartPath} class="chart-line"></path>
+                </svg>
+                <div class="hero-split">
+                    <div>
+                        <span>Investments</span>
+                        <strong><lightning-formatted-number value={summary.investmentsValue} format-style="currency" currency-code="USD"></lightning-formatted-number></strong>
+                    </div>
+                    <div>
+                        <span>Deposits</span>
+                        <strong><lightning-formatted-number value={summary.depositsValue} format-style="currency" currency-code="USD"></lightning-formatted-number></strong>
+                    </div>
+                    <div>
+                        <span>Loans Outstanding</span>
+                        <strong>-<lightning-formatted-number value={summary.loansOutstanding} format-style="currency" currency-code="USD"></lightning-formatted-number></strong>
+                    </div>
+                </div>
+            </section>
+
+            <section class="card">
+                <h2>Product Portfolio (Investments)</h2>
+                <template if:true={hasHoldings}>
+                    <template for:each={holdings} for:item="holding">
+                        <div class="holding" key={holding.name}>
+                            <div>
+                                <div class="holding-name">{holding.name}</div>
+                                <div class="holding-class">{holding.assetClass}</div>
+                            </div>
+                            <div class="holding-values">
+                                <div>
+                                    <lightning-formatted-number value={holding.marketValue} format-style="currency" currency-code="USD"></lightning-formatted-number>
+                                </div>
+                                <div class={holding.returnClass}>
+                                    <lightning-formatted-number value={holding.returnPercent} format-style="percent-fixed" maximum-fraction-digits="1"></lightning-formatted-number>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                </template>
+            </section>
+        </div>
+
+        <div class="grid two-col">
+            <section class="card">
+                <div class="card-head">
+                    <h2>My HELOC</h2>
+                    <span class={compliancePillClass}>{summary.heloc.complianceStatus}</span>
+                </div>
+                <div class="limit-row">
+                    <span>Approved limit</span>
+                    <strong><lightning-formatted-number value={summary.heloc.approvedLimit} format-style="currency" currency-code="USD"></lightning-formatted-number></strong>
+                </div>
+                <div class="progress-track">
+                    <div class="progress-fill" style={helocProgressStyle}></div>
+                </div>
+                <div class="limit-detail">
+                    <span><lightning-formatted-number value={summary.heloc.amountDrawn} format-style="currency" currency-code="USD"></lightning-formatted-number> drawn</span>
+                    <span><lightning-formatted-number value={summary.heloc.availableCredit} format-style="currency" currency-code="USD"></lightning-formatted-number> available</span>
+                </div>
+                <div class="heloc-bottom">
+                    <div>
+                        <span>Interest rate</span>
+                        <strong><lightning-formatted-number value={summary.heloc.interestRate} format-style="percent-fixed" maximum-fraction-digits="2"></lightning-formatted-number> variable</strong>
+                    </div>
+                    <div>
+                        <span>Next payment</span>
+                        <strong><lightning-formatted-number value={summary.heloc.nextPaymentAmount} format-style="currency" currency-code="USD"></lightning-formatted-number> · <lightning-formatted-date-time value={summary.heloc.nextPaymentDate}></lightning-formatted-date-time></strong>
+                    </div>
+                </div>
+                <div class="mini-chart-panel">
+                    <div class="mini-chart-title">Credit Utilization Trend</div>
+                    <svg viewBox="0 0 280 70" class="mini-chart-svg" aria-hidden="true">
+                        <path d="M0 52 L56 48 L112 42 L168 38 L224 33 L280 28" class="mini-chart-line"></path>
+                        <path d="M0 68 L0 52 L56 48 L112 42 L168 38 L224 33 L280 28 L280 68 Z" class="mini-chart-area"></path>
+                    </svg>
+                </div>
+            </section>
+
+            <section class="card">
+                <h2>Customer Experience Signals</h2>
+                <div class="stars">
+                    <template for:each={averageStars} for:item="star">
+                        <span key={star.value} class={star.className}>★</span>
+                    </template>
+                </div>
+                <p class="signal-subtext">
+                    Average rating: <strong><lightning-formatted-number value={summary.averageRating} maximum-fraction-digits="1"></lightning-formatted-number>/5</strong>
+                    across <strong>{surveyCount}</strong> survey(s).
+                </p>
+                <template if:true={latestSurvey}>
+                    <p class="quote">"{latestSurvey.comments}"</p>
+                </template>
+                <template if:true={hasSurveys}>
+                    <div class="survey-list">
+                        <template for:each={recentSurveys} for:item="survey">
+                            <div key={survey.surveyDate} class="survey-item">
+                                <span>{survey.surveyType}</span>
+                                <span><lightning-formatted-number value={survey.rating}></lightning-formatted-number>/5</span>
+                            </div>
+                        </template>
+                    </div>
+                </template>
+                <div class="emoji-row">
+                    <template for:each={emojiButtons} for:item="choice">
+                        <button key={choice.rating} data-rating={choice.rating} onclick={handleSelectRating} class={choice.className}>{choice.icon}</button>
+                    </template>
+                </div>
+                <lightning-textarea label="Share detailed feedback" value={feedbackText} onchange={handleCommentChange}></lightning-textarea>
+                <lightning-button variant="brand" label="Share detailed feedback" onclick={handleSubmitFeedback} disabled={isSubmitting}></lightning-button>
+            </section>
+        </div>
+
+        <div class="grid two-col">
+            <section class="card">
+                <h2>Service Commitments (Advisor View)</h2>
+                <div class="commitment"><span>Identity secured</span><span class={complianceCommitmentClass}>{complianceCommitmentText}</span></div>
+                <div class="commitment"><span>Decision SLA</span><span class="pill cleared">2.1 days avg</span></div>
+                <div class="commitment"><span>Advisor responsiveness</span><span class="pill cleared">98% met</span></div>
+                <div class="commitment"><span>Document requests</span><span class="pill pending">1 pending</span></div>
+                <div class="service-trend">
+                    <div class="service-trend-label">Service Quality Momentum</div>
+                    <svg viewBox="0 0 300 85" class="service-trend-svg" aria-hidden="true">
+                        <path d={qualityMomentumPath} class="service-trend-line"></path>
+                    </svg>
+                    <div class="service-trend-delta">Rating trend {qualityMomentumDelta} over recent checkpoints</div>
+                </div>
+            </section>
+
+            <section class="card">
+                <h2>Advisor Prep Notes</h2>
+                <template for:each={advisorInsights} for:item="insight">
+                    <div class="insight-row" key={insight.key}>
+                        <span class="insight-dot">•</span>
+                        <span>{insight.text}</span>
+                    </div>
+                </template>
+                <div class="advisor-row">
+                    <div class="avatar manager">{relationshipManagerInitials}</div>
+                    <div>
+                        <div class="holding-name">{summary.relationshipManager}</div>
+                        <div class="holding-class">Private Client Advisor</div>
+                    </div>
+                </div>
+                <p class="quote">"{firstName} - your HELOC draw cleared and I've queued the rate review we discussed. Free to chat Thursday?"</p>
+                <div class="action-row">
+                    <lightning-button label="Message"></lightning-button>
+                    <lightning-button label="Book review"></lightning-button>
+                </div>
+            </section>
+        </div>
+
+        <div class="grid one-col">
+            <section class="card">
+                <div class="card-head">
+                    <h2>Quality Management · Voice, Chat, Email</h2>
+                    <span class="pill cleared">Positive Momentum</span>
+                </div>
+                <div class="quality-grid">
+                    <div class="health-gauge-wrap">
+                        <div class="quality-subtitle">Composite Customer Health Score</div>
+                        <div class={customerHealthScoreClass}>
+                            <svg viewBox="0 0 180 180" class="health-gauge-svg" aria-hidden="true">
+                                <circle cx="90" cy="90" r="65" class="health-track"></circle>
+                                <circle cx="90" cy="90" r="65" class="health-meter" style={customerHealthStrokeStyle}></circle>
+                            </svg>
+                            <div class="health-score-content">
+                                <div class="health-score-value">{customerHealthScore}</div>
+                                <div class="health-score-label">{customerHealthScoreLabel}</div>
+                            </div>
+                        </div>
+                        <div class="health-footnote">
+                            Weighted from sentiment, compliance readiness, and engagement depth.
+                        </div>
+                    </div>
+                    <div>
+                        <div class="quality-subtitle">Channel Sentiment Health</div>
+                        <template for:each={interactionChannels} for:item="channel">
+                            <div key={channel.key} class="channel-row">
+                                <div class="channel-head">
+                                    <span>{channel.name} · {channel.count} interactions</span>
+                                    <span>{channel.positiveRounded}% positive ({channel.trend})</span>
+                                </div>
+                                <div class="channel-track">
+                                    <div class="channel-fill" style={channel.barStyle}></div>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                    <div>
+                        <div class="quality-subtitle">Keyword & Trend Intelligence (Lauren)</div>
+                        <template for:each={keywordTrends} for:item="keyword">
+                            <div key={keyword.key} class="keyword-row">
+                                <div>
+                                    <div class="holding-name">{keyword.label}</div>
+                                    <div class="holding-class">{keyword.mentions} signal(s) in recent interactions</div>
+                                </div>
+                                <span class={keyword.trendClass}>{keyword.trend}</span>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </lightning-card>
+
+    <lightning-card if:false={hasSummary} title="My Portfolio Home">
+        <div class="slds-p-around_medium">
+            <template if:true={loadError}>
+                <p>Unable to load portfolio details for this customer.</p>
+            </template>
+            <template if:false={loadError}>
+                <p>Select a customer record or configure a customerId.</p>
+            </template>
+        </div>
+    </lightning-card>
+</template>

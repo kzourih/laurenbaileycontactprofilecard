@@ -1,0 +1,129 @@
+<template>
+    <template lwc:if={isLoaded}>
+        <div class="intel-hub">
+            <!-- Large scenic banner -->
+            <div class="banner" style={bannerStyle}></div>
+
+            <!-- Centered avatar overlapping banner -->
+            <div class="avatar-center">
+                <div class="avatar-ring">
+                    <template lwc:if={hasPhoto}>
+                        <img src={intel.photoUrl} alt={intel.name} class="avatar-img" />
+                    </template>
+                    <template lwc:else>
+                        <div class="avatar-img avatar-initials">{initials}</div>
+                    </template>
+                </div>
+            </div>
+
+            <!-- Identity centered below avatar -->
+            <div class="identity-center">
+                <h2 class="client-name">{intel.name}</h2>
+                <template lwc:if={intel.location}>
+                    <p class="client-location">📍 {intel.location}</p>
+                </template>
+
+                <!-- Tier + Member Since badges -->
+                <template lwc:if={showBadges}>
+                    <div class="meta-badges">
+                        <template lwc:if={displayTier}>
+                            <span class="meta-badge badge-tier">★ {displayTier}</span>
+                        </template>
+                        <template lwc:if={displayMemberSince}>
+                            <span class="meta-badge badge-since">Member since {displayMemberSince}</span>
+                        </template>
+                    </div>
+                </template>
+            </div>
+
+            <!-- ═══ NAVIGATION ═══ -->
+            <div class="nav-bar">
+                <button class={supportTabClass} data-section="support" onclick={handleSectionClick}>
+                    <span class="nav-icon">◉</span> Support
+                </button>
+                <button class={financialTabClass} data-section="financial" onclick={handleSectionClick}>
+                    <span class="nav-icon">⊞</span> Financial
+                </button>
+            </div>
+
+            <!-- ═══ SUPPORT SECTION ═══ -->
+            <template lwc:if={isSupportActive}>
+                <div class="section-content section-gradient-support">
+                    <div class="support-stats">
+                        <div class="sup-stat">
+                            <span class="sup-value sup-open">{displayOpenCases}</span>
+                            <span class="sup-label">Open</span>
+                        </div>
+                        <div class="sup-stat">
+                            <span class="sup-value sup-high">{displayHighPriorityCases}</span>
+                            <span class="sup-label">High Priority</span>
+                        </div>
+                    </div>
+
+                    <template lwc:if={displayCases.length}>
+                        <div class="subsection">
+                            <div class="subsection-header">
+                                <span class="subsection-title">Recent Cases</span>
+                            </div>
+                            <template for:each={displayCases} for:item="cs">
+                                <div key={cs.id} class="case-row">
+                                    <span class={cs.priorityClass}></span>
+                                    <div class="case-info">
+                                        <span class="case-subject">{cs.subject}</span>
+                                        <span class="case-number">#{cs.caseNumber}</span>
+                                    </div>
+                                    <span class={cs.statusClass}>{cs.status}</span>
+                                </div>
+                            </template>
+                        </div>
+                    </template>
+                </div>
+            </template>
+
+            <!-- ═══ FINANCIAL SECTION ═══ -->
+            <template lwc:if={isFinancialActive}>
+                <div class="section-content section-gradient-financial">
+                    <template lwc:if={displayLoans.length}>
+                        <div class="subsection">
+                            <div class="subsection-header">
+                                <span class="subsection-title">Financial Portfolio</span>
+                                <span class="subsection-total">{displayTotalBalance}</span>
+                            </div>
+                            <template for:each={displayLoans} for:item="l">
+                                <div key={l.id} class="loan-row">
+                                    <div class="loan-info">
+                                        <span class="loan-type">{l.loanType}</span>
+                                        <span class="loan-rate">{l.interestRate}% APR</span>
+                                    </div>
+                                    <div class="loan-progress">
+                                        <div class="loan-bar">
+                                            <div class="loan-bar-fill" style={l.paidBarStyle}></div>
+                                        </div>
+                                        <div class="loan-amounts">
+                                            <span class="loan-balance">{l.formattedBalance}</span>
+                                            <span class="loan-paid">{l.paidPercent}% paid</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </template>
+                </div>
+            </template>
+        </div>
+    </template>
+
+    <!-- Error -->
+    <template lwc:elseif={hasError}>
+        <div class="slds-p-around_medium">
+            <p class="slds-text-color_error">Unable to load customer intelligence.</p>
+        </div>
+    </template>
+
+    <!-- Loading -->
+    <template lwc:else>
+        <div class="loading-wrap">
+            <lightning-spinner alternative-text="Loading intelligence" size="medium"></lightning-spinner>
+        </div>
+    </template>
+</template>
